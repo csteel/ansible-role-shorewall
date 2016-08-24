@@ -1,0 +1,16 @@
+################################################################################
+# {{ ansible_managed }}
+#
+# /etc/shorewall/zones
+# root:root 644
+# Used by service: Shorewall 
+#
+# Shorewall zones file
+#
+# 0.1 2016-06-13 - csteel - Initial file
+###############################################################################
+#ZONE   TYPE    OPTIONS         IN          OUT
+#                   OPTIONS         OPTIONS
+{% for i in zones %}
+{{ i.name }}	{{ i.type }}
+{% endfor %}

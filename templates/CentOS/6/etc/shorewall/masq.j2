@@ -1,0 +1,10 @@
+#################################################################################
+#       {{ ansible_managed }}
+#
+# For information about entries in this file, type "man shorewall-masq"
+# ###############################################################################
+# #INTERFACE      SOURCE      ADDRESS     PROTO   PORT(S) IPSEC   MARK
+#
+{% for i in masq %}
+{% if i.int is defined %}{{ i.int }}{% else %}{% endif %}		{% if i.subnet is defined %}{{ i.subnet }}{% else %}{% endif %}
+{% endfor %}

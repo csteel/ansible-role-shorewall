@@ -1,0 +1,32 @@
+---
+# file: host_vars/hostname/shorewall/vagrant_shorewall_rules
+
+# we add the standard port 22 ssh rule plus two additional rules for testing with Vagrant.
+# Our default Vagrant setup uses NAT and ssh port forwarding for ssh over ports 2222 and 2200 
+#
+#
+rules:
+
+- rules:
+
+  - action: "ACCEPT"
+    src: "0.0.0.0/0"
+    dest: "$FW"    
+    proto: "tcp"
+    port: 22
+    comment: "Public SSH"
+
+  - action: "ACCEPT"
+    src: "0.0.0.0/0"
+    dest: "$FW"
+    proto: "tcp"
+    port: 2222
+    comment: "Public SSH"
+
+  - action: "ACCEPT"
+    src: "0.0.0.0/0"
+    dest: "$FW"
+    proto: "tcp"
+    port: 2200
+    comment: "Public OpenVPN"
+

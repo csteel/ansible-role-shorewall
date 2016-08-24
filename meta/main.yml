@@ -1,0 +1,22 @@
+---
+# file: roles/shorewall/meta/main.yml
+dependencies:
+  - { role: ensure_dirs, 
+        ensure_dirs_on_remote: "{{ shorewall_ensure_dirs_on_remote }}",
+        ensure_dirs_on_local : "{{ shorewall_ensure_dirs_on_local }}"
+    }
+
+galaxy_info:
+  author: Christopher Steel
+  description: A role for configuring shorewall 
+  company: MCIN
+  license: MIT
+  min_ansible_version: 2.0.0.2
+  platforms:
+   - name: EL
+     versions:
+      - 7
+   - name: Ubuntu
+     versions:
+      - precise 
+  galaxy_tags: []

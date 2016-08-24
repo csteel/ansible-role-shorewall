@@ -1,0 +1,19 @@
+################################################################################
+# {{ ansible_managed }}
+#
+# /etc/shorewall/policy
+# root:root 644
+# Used by service: Shorewall 
+#
+# Shorewall policy file
+#
+# 0.1 2016-06-13 - csteel - Initial file
+###############################################################################
+#SOURCE DEST    POLICY          LOG     LIMIT:          CONNLIMIT:
+#
+{% for i in policies %}
+{{ i.src }}	{{ i.dst }}	{{ i.policy }}  {{ i.log_level }}
+{% endfor %}
+
+# THE FOLLOWING POLICY MUST ALWAYS BE LAST
+all     all     REJECT

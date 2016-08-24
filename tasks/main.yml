@@ -1,0 +1,346 @@
+---
+# file: shorewall/tasks/main.yml
+
+- debug: var=ansible_distribution
+  tags: [ 'debug' ]
+
+- include_vars: "{{ item }}"
+  with_first_found:
+   - "defaults/{{ ansible_distribution }}.yml"
+#   - "{{ ansible_os_family }}.yml"
+#   - "defaults.yml"
+
+- debug: var=shorewall_vars_test
+  tags: [ 'debug' ]
+
+
+#- include_vars: "{{ item }}"
+#  with_first_found:
+#   - "defaults/vagrant.yml"
+#   - "defaults.yml"
+
+# Configure /etc/services, important for Vagrant due to port forwarding
+
+- name: "Set ssh tcp and udp to be the machines forwarded port value"
+  become: true
+  lineinfile:
+    "dest='/etc/services'
+    regexp='^ssh		22/tcp'
+    line='ssh		{{ ansible_ssh_port }}/tcp				# SSH Remote Login Protocol'
+    state=present"
+
+- name: "Set ssh tcp and udp to be the machines forwarded port value"
+  become: true
+  lineinfile:
+    "dest='/etc/services'
+    regexp='^ssh		22/udp'
+    line='ssh		{{ ansible_ssh_port }}/udp				# SSH Remote Login Protocol'
+    state=present"
+
+- name: "Set ssh tcp and udp to be the machines forwarded port value"
+  become: true
+  lineinfile: "dest='/etc/services' regexp='^ssh		22/sctp' line='ssh		{{ ansible_ssh_port }}/sctp				# SSH' state=present"
+
+- name: we set a handler to reboot system if connection is severed.
+  command: /bin/true
+  notify: reboot system
+  when: ansible_connection != 'local'
+
+# Ensure for our directories on our (local) controller.
+
+- name: ensure for directories
+  become: false
+  local_action: file
+    path='{{ item.path }}'
+    state=directory
+  with_items:
+    - { path: "{{ shorewall_fetched_files_root }}" }
+    - { path: "{{ shorewall_fetched_files_history_root }}" }
+    - { path: "{{ shorewall_fetched_files_original_root }}" }
+    - { path: "{{ shorewall_fetched_files_previous_root }}" }
+
+# OS specific operations
+
+## Debian specific 
+
+# apt update cache
+
+- name: update apt cache
+  become: true
+  apt: 
+    update_cache=yes
+    cache_valid_time=43200
+  when: ansible_distribution == "Debian"
+  tags: [ 'packages', 'shorewall' ]
+
+# ensure shorewall installed
+
+- name: install shorewall
+  become: true
+  apt: 
+    name=shorewall
+    state=installed
+  when: ansible_distribution == "Debian" 
+  tags: [ 'packages', 'shorewall' ]
+
+## CentOS specific
+
+- name: "add shorewall rpm key"
+  rpm_key:
+    state=present
+    key="{{ shorewall_gpg_key_url }}"
+  when: ansible_distribution == "CentOS" 
+
+- name: "Download shorewall-core-5.0.11.0-1.el6.noarch.rpm" 
+  get_url:
+    url      : "http://www.invoca.ch/pub/packages/shorewall/RPMS/ils-6/noarch/{{ item.value.rpm }}"
+    dest     : "/home/ansible/sys/sw/rpms/shorewall/"
+    group    : "{{ item.group | default(omit) }}"
+    owner    : "{{ item.owner | default(omit) }}"
+    mode     : "{{ item.mode | default(omit) }}"
+    others   : "{{ item.others | default(omit) }}"
+    sha256sum: "{{ item.sha256sum | default(omit) }}"
+  with_dict : shorewall_rpms
+  when: ansible_distribution == "CentOS" 
+
+- name: "CentOS - installing shorewall requirements"
+  become: true
+  yum:
+    pkg="{{ item }}"
+    state=present
+  with_items:
+    - epel-release
+    - bc
+    - perl
+  when: ansible_distribution == "CentOS"
+
+# correct but rpm generates errors this way
+- name: "CentOS 6.5: install shorewall rpms"
+  become: true
+  yum:
+    pkg="/home/ansible/sys/sw/rpms/shorewall/{{ item.value.rpm }}"
+    state=present
+  with_dict: shorewall_rpms
+  when: ansible_distribution == "CentOS"
+
+#- name    : "CentOS 6.5: install shorewall rpms"
+#  become  : true
+#  command : "sudo rpm -ivh {{ item.value.rpm }}"
+#  args:
+#    chdir   : '/home/ansible/sys/sw/rpms/shorewall/'
+#    creates : '/etc/shorewall'
+#  with_dict: shorewall_rpms
+#  when: ansible_distribution == "CentOS"
+
+# Originals
+
+## Save original files if we have not already
+
+- name: 'Do we have an original file in {{ shorewall_fetched_files_original_root }}/{{ ansible_hostname }}? '
+  become: false
+  local_action: stat path={{ shorewall_fetched_files_original_root }}/{{ ansible_hostname }}/etc/shorewall/zones
+  register: stat_shorewall_originals
+  tags: [ 'packages', 'shorewall', 'originals' ]
+
+- debug: var=stat_shorewall_originals.stat.exists
+
+- name: "backup our shorewall originals"
+  fetch:
+    src='{{ item.value.dest }}'  
+    dest='{{ shorewall_fetched_files_original_root }}'
+    flat=no
+  with_dict: "{{ shorewall_config_files }}"
+  when: stat_shorewall_originals.stat.exists != true and shorewall_backup_original_config == 'true'
+  tags: [ 'packages', 'shorewall', 'backup' ]
+
+# Previous configuration
+
+## Backup the current configuration and overwrite the last one.
+
+- name: "backup our current shorewall to previous"
+  fetch:
+    src='{{ item.value.dest }}'
+    dest='{{ shorewall_fetched_files_previous_root }}'
+    flat=no
+  with_dict: "{{ shorewall_config_files }}"
+  when: shorewall_backup_current_config == 'true'
+  tags: [ 'packages', 'shorewall', 'backup' ]
+
+# History of configurations
+
+## Backup our current configuration to our history archive
+
+- name: "backup our current shorewall to our history archive"
+  fetch:
+    src='{{ item.value.dest }}'
+    dest='{{ shorewall_fetched_files_history_root }}'
+    flat=no
+  with_dict: "{{ shorewall_config_files }}"
+  when: shorewall_backup_current_config_to_history == 'true'
+  tags: [ 'packages', 'shorewall', 'backup' ]
+
+# template our shorewall files
+
+- name: "running our templates and generate our configuration files"
+  become: true
+  template:
+    backup=yes
+    src='{{ ansible_distribution }}/{{ ansible_distribution_major_version }}/{{ item.value.src }}.j2'
+    dest='{{ item.value.dest }}'
+    owner='{{ item.value.owner | default(omit) }}'
+    group='{{ item.value.group | default(omit) }}'
+    mode='{{ item.value.mode | default(omit) }}'
+  with_dict: "{{ shorewall_config_files }}"
+#  notify: 
+#  - restart shorewall
+  tags: [ 'packages', 'shorewall', 'configure' ]
+
+- name: "ensure masq file templatized when shorewall_configure_masq == true"
+  template:
+    src='{{ ansible_distribution }}/{{ ansible_distribution_major_version }}/masq.j2'
+    dest='/etc/shorewall/masq'
+    owner='{{ item.value.owner }}'
+    group='{{ item.value.group }}'
+    mode='{{ item.value.mode }}'
+  when: shorewall_configure_masq is defined and shorewall_configure_masq == True
+#  notify: 
+#  - restart shorewall
+  tags: [ 'packages', 'shorewall' ]
+
+# Get check our shorewall configuration files
+
+- name: run shorewall check
+  become: true
+  shell: shorewall check
+  register: shorewall_check
+  tags: [ 'packages', 'shorewall', 'shorewall_check' ]
+
+- debug: var=shorewall_check
+  tags: [ 'debug', 'shorewall_check' ]
+
+- name: fail if shorewall check fails
+  fail: msg="1st test, shorewall check failed on {{ inventory_hostname }}!!!"
+  when: shorewall_check.stdout.find('Shorewall configuration verified') == -1
+  tags: [ 'debug', 'shorewall_check' ]
+
+- name: Set `STARTUP_ENABLED=1` in `/etc/shorewall/shorewall.conf` so shorewall is started on boot.
+  become: true
+  lineinfile:
+    dest='/etc/shorewall/shorewall.conf'
+    regexp='^STARTUP_ENABLED=NO'
+    line='STARTUP_ENABLED=YES'
+    state='present'
+  when: ansible_distribution == "CentOS"
+  tags: [ 'packages', 'shorewall', 'shorewall_check' ]
+
+# Check shorewall status
+
+- name: get shorewall status
+  become: true
+  shell: shorewall status
+  ignore_errors: true
+  register: shorewall_status
+  tags: [ 'packages', 'shorewall', 'shorewall_status' ]
+
+# Reload shorewall
+
+- name: Restart Shorewall service
+  become: true
+  service:
+    name=shorewall
+    state=restarted
+  when: shorewall_check.stdout.find('Shorewall configuration verified') != -1 and
+        start_shorewall == 'true'
+  tags: [ 'packages', 'shorewall' ]
+
+# Start shorewall service.
+
+- name: start the shorewall status
+  become: true
+  shell: shorewall start
+  register: shorewall_start_output
+  when: shorewall_check.stdout.find('Shorewall configuration verified') != -1 and
+        shorewall_status.stdout.find('Shorewall is started') == -1 and
+        start_shorewall == 'true'
+  tags: [ 'packages', 'shorewall' ]
+
+- debug: var=shorewall_start_output
+
+# Check shorewall status, did it start, is it running?
+
+- name: check shorewall status
+  become: true
+  shell: shorewall status
+  register: shorewall_status
+  tags: [ 'packages', 'shorewall', 'status' ]
+
+- debug: var=shorewall_status
+  tags: [ 'packages', 'shorewall', 'status' ]
+
+- name: 1st test, fail if shorewall is not running
+  fail: msg="1st test, shorewall failed to start on {{ inventory_hostname }}!!!"
+  when: shorewall_status.stdout.find('Shorewall is running') == -1
+  tags: [ 'packages', 'shorewall', 'status' ]
+
+# Configure shorewall to start on system boot as we are still able to connect.
+
+- name: Set `startup=1` in `/etc/default/shorewall` so shorewall is started on boot.
+  become: true
+  lineinfile:
+    dest='/etc/default/shorewall'
+    regexp='^startup=0'
+    line='startup=1'
+    state='present'
+  when: ansible_distribution == "Ubuntu"
+  tags: [ 'packages', 'shorewall', 'shorewall_check' ]
+
+# Start Reboot sequence
+#
+# https://github.com/ansible/ansible/issues/10616
+
+#- name: Set SELINUX to Permissive
+#  selinux: state=permissive policy=targeted
+#  when: ansible_connection != 'local'
+
+- name: "restart the system"
+  become: true
+  command: shutdown -r now "Ansible triggered reboot to test firewall start on boot"
+  async: 0
+  poll: 0
+  ignore_errors: true
+  when: ansible_connection != 'local'
+
+# wait for target systems reboot and port 22 to become available before continuing
+
+- name: wait for the server to restart
+  local_action: wait_for host={{ inventory_hostname }}
+                port=22
+                search_regex=OpenSSH
+                delay=10
+                timeout=300
+                state=started
+  sudo: false
+  when: ansible_connection != 'local'
+
+# Check shorewall status, did it start, is it running?
+
+- name: check shorewall status
+  become: true
+  shell: shorewall status
+  register: shorewall_status
+  tags: [ 'packages', 'shorewall', 'status' ]
+
+- debug: var=shorewall_status
+
+- name: Fail if shorewall is not restarted
+  fail: msg="Shorewall failed to start on {{ inventory_hostname }}!!!"
+  when: shorewall_status.stdout.find('Shorewall is running') == -1
+
+# Now that shorewall is installed, configured and running we will disable ufw
+
+- name: SUCCESS - Shorewall installed, configured and running, disabling ufw
+  become: true
+  shell: ufw disable
+  tags: [ 'packages', 'shorewall' ]
+  when: and ansible_distribution == "Ubuntu"
+

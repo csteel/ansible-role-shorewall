@@ -1,0 +1,11 @@
+---
+# handlers file for shorewall
+
+- name: reboot system
+  become: true
+  command: shutdown -r now "Ansible triggered reboot to test firewall start on boot"
+  when: ansible_connection != 'local'
+
+- name: restart shorewall
+  become: true
+  service: name=shorewall state=restarted

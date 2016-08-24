@@ -1,0 +1,37 @@
+################################################################################
+# {{ ansible_managed }}
+#
+# /etc/shorewall/rules
+# root:root 644
+# Used by service: Shorewall 
+#
+# Shorewall rules file
+#
+# 0.1 2016-06-13 - csteel - Initial file
+#
+# Shorewall -- /etc/shorewall/rules
+################################################################################
+#
+# For information on the settings in this file, type "man shorewall-rules"
+#
+# The manpage is also online at
+# http://www.shorewall.net/manpages/shorewall-rules.html
+#
+#################################################################################################################################
+#############################
+#ACTION		SOURCE		DEST		PROTO	DPORT	SPORT	ORIGDEST	RATE	USER	MARK	CONNLIMIT	T
+IME	HEADERS	SWITCH	HELPER
+
+?SECTION ALL
+?SECTION ESTABLISHED
+?SECTION RELATED
+?SECTION INVALID
+?SECTION UNTRACKED
+?SECTION NEW
+
+{% for i in rules %}
+{% for j in i.rules %}
+{{ j.action }}	{% if j.src is defined %}net:{{ j.src }}{% else %}-{% endif %}	{{ j.dest }}		{% if j.proto is defined %}{{ j.proto }}{% else %}-{% endif %}	{% if j.port is defined %}{{ j.port }}{% else %}-{% endif %}	{% if j.comment is defined %}#{{ j.comment }}{% else %}# -{% endif %}
+
+{% endfor %}
+{% endfor %}
