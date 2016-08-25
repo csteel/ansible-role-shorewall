@@ -3,17 +3,6 @@
 
 shorewall_vars_test: 'roles/shorewall/defaults/CentOS.yml'
 
-shorewall_ensure_dirs_on_remote:
-
-  home_user_sys_sw_rpms:
-
-    state          : "directory"
-    path           : "/home/ansible/sys/sw/rpms/shorewall"
-    owner          : '{{ shorewall_deployment_user }}'
-    group          : '{{ shorewall_deployment_user }}'
-    mode           : '0755'
-
-
 shorewall_rpms:
 
   shorewall-5.0.11.0-1.el6.noarch:
