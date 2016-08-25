@@ -6,18 +6,20 @@
 
 - include_vars: "{{ item }}"
   with_first_found:
-   - "defaults/{{ ansible_distribution }}.yml"
+   - "{{ ansible_distribution }}.yml"
+   - "{{ ansible_os_family }}.yml"
+   - "default.yml"
+
+# works fine at home, at work requires file in vars/CentOS, why?
+# this is not working on work system, why?
+#- include_vars: "{{ item }}"
+#  with_first_found:
+#   - "defaults/{{ ansible_distribution }}.yml"
 #   - "{{ ansible_os_family }}.yml"
 #   - "defaults.yml"
 
 - debug: var=shorewall_vars_test
   tags: [ 'debug' ]
-
-
-#- include_vars: "{{ item }}"
-#  with_first_found:
-#   - "defaults/vagrant.yml"
-#   - "defaults.yml"
 
 # Configure /etc/services, important for Vagrant due to port forwarding
 
@@ -44,7 +46,7 @@
 - name: we set a handler to reboot system if connection is severed.
   command: /bin/true
   notify: reboot system
-  when: ansible_connection != 'local'
+  when: ansible_connection is defined and ansible_connection != 'local'
 
 # Ensure for our directories on our (local) controller.
 
@@ -235,14 +237,14 @@
 
 # Check shorewall status
 
-- name: get shorewall status
+- name: check shorewall status
   become: true
   shell: shorewall status
   ignore_errors: true
   register: shorewall_status
   tags: [ 'packages', 'shorewall', 'shorewall_status' ]
 
-# Reload shorewall
+# Restart shorewall
 
 - name: Restart Shorewall service
   become: true
@@ -255,7 +257,7 @@
 
 # Start shorewall service.
 
-- name: start the shorewall status
+- name: start the shorewall service
   become: true
   shell: shorewall start
   register: shorewall_start_output
