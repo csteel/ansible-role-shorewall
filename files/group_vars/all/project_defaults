@@ -1,0 +1,14 @@
+# The values set for the following two variables:
+#
+#     project_deployment_user_name
+#     project_controller_user_name
+#
+# are referenced and required by the following two variables in the shorewall role located
+# in  `roles/shorewall/defaults/main.ynl`:
+#
+#	shorewall_deployment_user_name: '{{ project_deployment_user_name }}'
+# 	shorewall_controller_user_name: '{{ project_controller_user_name }}' 
+
+project_deployment_user_name: your_deployment_user
+project_controller_user_name: your_controller_user # or '{{ project_deployment_user_name }}'
+
