@@ -4,19 +4,27 @@
 - debug: var=ansible_distribution
   tags: [ 'debug' ]
 
-- include_vars: "{{ item }}"
-  with_first_found:
-   - "{{ ansible_distribution }}.yml"
-   - "{{ ansible_os_family }}.yml"
-   - "default.yml"
+#- include_vars: "{{ item }}"
+#  with_first_found:
+#   - "{{ ansible_distribution }}.yml"
+#   - "{{ ansible_os_family }}.yml"
+#   - "default.yml"
 
 # works fine at home, at work requires file in vars/CentOS, why?
 # this is not working on work system, why?
-#- include_vars: "{{ item }}"
-#  with_first_found:
-#   - "defaults/{{ ansible_distribution }}.yml"
-#   - "{{ ansible_os_family }}.yml"
-#   - "defaults.yml"
+- include_vars: "{{ item }}"
+  with_first_found:
+   - "defaults/{{ ansible_distribution }}.yml"
+   - "{{ ansible_os_family }}.yml"
+   - "defaults.yml"
+  when: "'{{ ansible_ssh_user }}' != 'vagrant'"
+
+- include_vars: "{{ item }}"
+  with_first_found:
+   - "defaults/vagrant.yml"
+   - "defaults.yml"
+  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
+
 
 - debug: var=shorewall_vars_test
   tags: [ 'debug' ]

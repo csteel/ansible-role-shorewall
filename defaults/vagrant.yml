@@ -20,6 +20,6 @@ rules:
     src: "0.0.0.0/0"
     dest: "$FW"
     proto: "tcp"
-    port: 2201
+    port: 2200
     comment: "Public OpenVPN"
 
