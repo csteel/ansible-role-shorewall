@@ -1,5 +1,8 @@
 # file: roles/shorewall/ROADMAP.md
 
+* cleanup variable.
+* set some sane defaults/main.yml filewall rules as a default firewall.	
+
 * add ansible `assemble` module functionality to allow for multiple sources of firewall roles:
     * Global
     * By groups
