@@ -1,0 +1,24 @@
+################################################################################
+# {{ ansible_managed }}
+#
+# shorewall-5.0.11.0-1.el6.noarch.rpm
+# shorewall-core-5.0.11.0-1.el6.noarch.rpm
+# /etc/shorewall/masq
+# root:root 600
+# Used by service: Shorewall
+#
+# Shorewall rules file
+#
+# 0.1 2016-06-13 - csteel - Initial file
+#
+# Shorewall -- /etc/shorewall/masq
+#################################################################################
+#       {{ ansible_managed }}
+#
+# For information about entries in this file, type "man shorewall-masq"
+# ###############################################################################
+# #INTERFACE      SOURCE      ADDRESS     PROTO   PORT(S) IPSEC   MARK
+#
+{% for i in masq %}
+{% if i.int is defined %}{{ i.int }}{% else %}{% endif %}		{% if i.subnet is defined %}{{ i.subnet }}{% else %}{% endif %}
+{% endfor %}

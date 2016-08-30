@@ -1,0 +1,28 @@
+################################################################################
+# {{ ansible_managed }}
+#
+# shorewall-5.0.11.0-1.el6.noarch.rpm
+# shorewall-core-5.0.11.0-1.el6.noarch.rpm
+# /etc/shorewall/zones
+# root:root 600
+# Used by service: Shorewall 
+#
+# Shorewall zones file
+#
+# 0.1 2016-06-13 - csteel - Initial file
+###############################################################################
+#
+# Shorewall -- /etc/shorewall/zones
+#
+# For information about this file, type "man shorewall-zones"
+#
+# The manpage is also online at
+# http://www.shorewall.net/manpages/shorewall-zones.html
+#
+###############################################################################
+#ZONE		TYPE		OPTIONS		IN_OPTIONS	OUT_OPTIONS
+
+# fw		firewall
+{% for i in zones %}
+{{ i.name }}	{{ i.type }}
+{% endfor %}
