@@ -6,12 +6,16 @@
 shorewall_deployment_user_name                   : '{{ project_deployment_user_name }}'
 shorewall_controller_user_name                   : '{{ project_controller_user_name }}'
 
-
 start_shorewall                             : 'false'
 
-shorewall_backup_original_config            : 'false'
+shorewall_backup_original_config            : 'true'
 shorewall_backup_current_config             : 'false'
 shorewall_backup_current_config_to_history  : 'false'
+
+# rpms are defined in defaults/CentOS. We **must** set this to be an empty dictionary or 
+# runs on nodes with an os other than CentOS will not work, could use "when defined instead.
+
+shorewall_rpms: {}
 
 # fixed time stamp creation 
 #

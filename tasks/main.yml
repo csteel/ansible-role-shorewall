@@ -4,20 +4,14 @@
 - debug: var=ansible_distribution
   tags: [ 'debug' ]
 
-#- include_vars: "{{ item }}"
-#  with_first_found:
-#   - "{{ ansible_distribution }}.yml"
-#   - "{{ ansible_os_family }}.yml"
-#   - "default.yml"
-
-# works fine at home, at work requires file in vars/CentOS, why?
-# this is not working on work system, why?
-- include_vars: "{{ item }}"
+- name: "include defaults/'{{ ansible_distribution }}.yml'"
+  include_vars: "{{ item }}"
   with_first_found:
    - "defaults/{{ ansible_distribution }}.yml"
+   - "vars/{{ ansible_distribution }}.yml"
    - "{{ ansible_os_family }}.yml"
    - "defaults.yml"
-  when: "'{{ ansible_ssh_user }}' != 'vagrant'"
+  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
 
 - include_vars: "{{ item }}"
   with_first_found:
@@ -80,7 +74,7 @@
   apt: 
     update_cache=yes
     cache_valid_time=43200
-  when: ansible_distribution == "Debian"
+  when: ansible_os_family == "Debian"
   tags: [ 'packages', 'shorewall' ]
 
 # ensure shorewall installed
@@ -90,7 +84,7 @@
   apt: 
     name=shorewall
     state=installed
-  when: ansible_distribution == "Debian" 
+  when: ansible_os_family == "Debian" 
   tags: [ 'packages', 'shorewall' ]
 
 ## CentOS specific
@@ -133,20 +127,11 @@
   with_dict: shorewall_rpms
   when: ansible_distribution == "CentOS"
 
-#- name    : "CentOS 6.5: install shorewall rpms"
-#  become  : true
-#  command : "sudo rpm -ivh {{ item.value.rpm }}"
-#  args:
-#    chdir   : '/home/ansible/sys/sw/rpms/shorewall/'
-#    creates : '/etc/shorewall'
-#  with_dict: shorewall_rpms
-#  when: ansible_distribution == "CentOS"
-
 # Originals
 
 ## Save original files if we have not already
 
-- name: 'Do we have an original file in {{ shorewall_fetched_files_original_root }}/{{ ansible_hostname }}? '
+- name: "Do we have an original file in {{ shorewall_fetched_files_original_root }}/{{ ansible_hostname }}?"
   become: false
   local_action: stat path={{ shorewall_fetched_files_original_root }}/{{ ansible_hostname }}/etc/shorewall/zones
   register: stat_shorewall_originals
@@ -155,6 +140,7 @@
 - debug: var=stat_shorewall_originals.stat.exists
 
 - name: "backup our shorewall originals"
+  ignore_errors: yes
   fetch:
     src='{{ item.value.dest }}'  
     dest='{{ shorewall_fetched_files_original_root }}'
@@ -201,6 +187,20 @@
     group='{{ item.value.group | default(omit) }}'
     mode='{{ item.value.mode | default(omit) }}'
   with_dict: "{{ shorewall_config_files }}"
+  when: ansible_os_family == "RedHat"
+
+- name: "running our templates and generate our configuration files"
+  become: true
+  template:
+    backup=yes
+    src='{{ ansible_distribution }}/{{ ansible_distribution_version }}/{{ item.value.src }}.j2'
+    dest='{{ item.value.dest }}'
+    owner='{{ item.value.owner | default(omit) }}'
+    group='{{ item.value.group | default(omit) }}'
+    mode='{{ item.value.mode | default(omit) }}'
+  with_dict: "{{ shorewall_config_files }}"
+  when: ansible_os_family != "RedHat"
+
 #  notify: 
 #  - restart shorewall
   tags: [ 'packages', 'shorewall', 'configure' ]
