@@ -19,7 +19,6 @@
    - "defaults.yml"
   when: "'{{ ansible_ssh_user }}' == 'vagrant'"
 
-
 - debug: var=shorewall_vars_test
   tags: [ 'debug' ]
 
@@ -49,6 +48,9 @@
   command: /bin/true
   notify: reboot system
   when: ansible_connection is defined and ansible_connection != 'local'
+
+- debug: var=shorewall_controller_user
+  tags: [ 'debug' ]
 
 # Ensure for our directories on our (local) controller.
 

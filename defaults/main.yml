@@ -3,8 +3,8 @@
 
 # you probably want to overide these in group_vars/shorewall/defaults
 
-shorewall_deployment_user_name                   : '{{ project_deployment_user_name }}'
-shorewall_controller_user_name                   : '{{ project_controller_user_name }}'
+shorewall_deployment_user_name              : '{{ project_deployment_user_name }}'
+shorewall_controller_user_name              : '{{ project_controller_user_name }}'
 
 start_shorewall                             : 'false'
 
@@ -37,6 +37,7 @@ shorewall_ensure_dirs_on_remote:
     mode           : '0755'
 
 # this could be called `shorewall_ensure_dirs_on_local_all_os`
+
 shorewall_ensure_dirs_on_local:
 
   ace_fetched_files_dir:
