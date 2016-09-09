@@ -1,5 +1,6 @@
 # file: roles/shorewall/ROADMAP.md
 
+* Flush handlers near end of playbook once shorewall check is done and is configure to restart on system boot, perhaps replace current reboot sequence?
 * README.md needs a very big update
 * cleanup variable.
 * set some sane defaults/main.yml filewall rules as a default firewall.	
