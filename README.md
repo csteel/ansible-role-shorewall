@@ -22,8 +22,13 @@ Currently in process of adding support for CentOS
 
 ### Role Variables
 
+New variable added for testing new firewall configurations:
 
-Required default variable values are located in:
+    shorewall_start: true
+
+Once everything is working as it should this might be best placed in `group_vars/shorewall/defaults` or `host_vars/hostname/shorewall/custom `.
+
+Other required default variable values are located in:
 
     role/shorewall/defaults/main.yml
     
@@ -31,7 +36,7 @@ The values in `role/shorewall/defaults/main.yml` can be easily overridden by pla
 
 * project/host_vars/pc-001/shorewall/shorewall.yml
 * project/group_vars/all/shorewall.yml
-* project/group_vars/shorewall.yml
+* project/group_vars/shorewall/defaults.yml
 
 ### Playbook Example
 
