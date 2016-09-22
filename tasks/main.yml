@@ -44,10 +44,10 @@
   become: true
   lineinfile: "dest='/etc/services' regexp='^ssh		22/sctp' line='ssh		{{ ansible_ssh_port }}/sctp				# SSH' state=present"
 
-- name: we set a handler to reboot system if connection is severed.
-  command: /bin/true
-  notify: reboot system
-  when: ansible_connection is defined and ansible_connection != 'local'
+#- name: we set a handler to reboot system if connection is severed.
+#  command: /bin/true
+#  notify: reboot system
+#  when: ansible_connection is defined and ansible_connection != 'local'
 
 - debug: var=shorewall_controller_user
   tags: [ 'debug' ]
@@ -203,10 +203,6 @@
   with_dict: "{{ shorewall_config_files }}"
   when: ansible_os_family != "RedHat"
 
-#  notify: 
-#  - restart shorewall
-  tags: [ 'packages', 'shorewall', 'configure' ]
-
 - name: "ensure masq file templatized when shorewall_configure_masq == true"
   template:
     src='{{ ansible_distribution }}/{{ ansible_distribution_major_version }}/masq.j2'
@@ -215,9 +211,6 @@
     group='{{ item.value.group }}'
     mode='{{ item.value.mode }}'
   when: shorewall_configure_masq is defined and shorewall_configure_masq == True
-#  notify: 
-#  - restart shorewall
-  tags: [ 'packages', 'shorewall' ]
 
 # Get check our shorewall configuration files
 
@@ -227,7 +220,8 @@
   register: shorewall_check
   tags: [ 'packages', 'shorewall', 'shorewall_check' ]
 
-- debug: var=shorewall_check
+- name: Debug value of shorewall_check
+  debug: var=shorewall_check
   tags: [ 'debug', 'shorewall_check' ]
 
 - name: fail if shorewall check fails
@@ -244,6 +238,18 @@
     state='present'
   tags: [ 'packages', 'shorewall', 'shorewall_check' ]
 
+# Configure shorewall to start on system boot as we are still able to connect.
+
+- name: Set `startup=1` in `/etc/default/shorewall` so shorewall is started on boot.
+  become: true
+  lineinfile:
+    dest='/etc/default/shorewall'
+    regexp='^startup=0'
+    line='startup=1'
+    state='present'
+  when: ansible_distribution == "Ubuntu"
+  tags: [ 'packages', 'shorewall', 'shorewall_check' ]
+
 # Check shorewall status
 
 - name: check shorewall status
@@ -253,26 +259,29 @@
   register: shorewall_status
   tags: [ 'packages', 'shorewall', 'shorewall_status' ]
 
+- debug: var=shorewall_status
+  tags: [ 'debug', 'shorewall_status' ]
+
+- debug: var=shorewall_start
+  tags: [ 'debug', 'start_shorewall' ]
+
 # Restart shorewall
 
-- name: Restart Shorewall service
+- name: "Restart Shorewall service if service is running"
   become: true
   service:
     name=shorewall
     state=restarted
-  when: shorewall_check.stdout.find('Shorewall configuration verified') != -1 and
-        start_shorewall == 'true'
+  when: shorewall_status.stdout.find('Shorewall is running') != -1
   tags: [ 'packages', 'shorewall' ]
 
 # Start shorewall service.
 
-- name: start the shorewall service
+- name: "Start the shorewall service if it is not running"
   become: true
   shell: shorewall start
   register: shorewall_start_output
-  when: shorewall_check.stdout.find('Shorewall configuration verified') != -1 and
-        shorewall_status.stdout.find('Shorewall is started') == -1 and
-        start_shorewall == 'true'
+  when: shorewall_status.stdout.find('Shorewall is running') == -1
   tags: [ 'packages', 'shorewall' ]
 
 - debug: var=shorewall_start_output
@@ -292,18 +301,6 @@
   fail: msg="1st test, shorewall failed to start on {{ inventory_hostname }}!!!"
   when: shorewall_status.stdout.find('Shorewall is running') == -1
   tags: [ 'packages', 'shorewall', 'status' ]
-
-# Configure shorewall to start on system boot as we are still able to connect.
-
-- name: Set `startup=1` in `/etc/default/shorewall` so shorewall is started on boot.
-  become: true
-  lineinfile:
-    dest='/etc/default/shorewall'
-    regexp='^startup=0'
-    line='startup=1'
-    state='present'
-  when: ansible_distribution == "Ubuntu"
-  tags: [ 'packages', 'shorewall', 'shorewall_check' ]
 
 # Start Reboot sequence
 #
