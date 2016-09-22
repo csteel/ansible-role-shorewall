@@ -302,10 +302,32 @@
   when: shorewall_status.stdout.find('Shorewall is running') == -1
   tags: [ 'packages', 'shorewall', 'status' ]
 
+# Set shorewall to start on boot.
+# * REQUIRED FOR Ubuntu 16.04
+# https://docs.ansible.com/ansible/systemd_module.html
+#
+# Example action to restart service cron on centos, in all cases, also issue deamon-reload to pick up config changes
+#
+#- systemd: name=httpd state=reloaded
+#
+#- name: systemd - enable shorewall on boot
+#  systemd:
+#    name: shorewall
+#    enabled: yes
+
+- name: "systemd - have shorewall start on boot"
+  become: true
+  shell: systemctl enable shorewall
+  register: shorewall_systemctl_check
+  when: ansible_distribution_version is defined and ansible_distribution_version == "16.04"
+  tags: [ 'packages', 'shorewall', 'shorewall_systemctl_check' ]
+
+- debug: var=shorewall_systemctl_check
+
 # Start Reboot sequence
 #
 # https://github.com/ansible/ansible/issues/10616
-
+#
 #- name: Set SELINUX to Permissive
 #  selinux: state=permissive policy=targeted
 #  when: ansible_connection != 'local'
