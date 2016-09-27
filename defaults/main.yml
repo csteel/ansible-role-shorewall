@@ -2,6 +2,7 @@
 # file roles/shorewall/defaults/main.yml
 
 # you probably want to overide these in group_vars/shorewall/defaults
+shorewall_default_ssh_port                  : 22
 
 shorewall_deployment_user_name              : '{{ project_deployment_user_name }}'
 shorewall_controller_user_name              : '{{ project_controller_user_name }}'
