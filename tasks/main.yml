@@ -4,20 +4,21 @@
 - debug: var=ansible_distribution
   tags: [ 'debug' ]
 
-#- name: "include defaults/'{{ ansible_distribution }}.yml'"
-#- include_vars: "{{ item }}"
-#  with_first_found:
-#   - "defaults/{{ ansible_distribution }}.yml"
+- name: "include defaults/'{{ ansible_distribution }}.yml'"
+  include_vars: "{{ item }}"
+  with_first_found:
+   - "defaults/{{ ansible_distribution }}.yml"
+   - "defaults/defaults.yml"
 #   - "vars/{{ ansible_distribution }}.yml"
 #   - "{{ ansible_os_family }}.yml"
 #   - "defaults.yml"
 #  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
 
-- include_vars: "{{ item }}"
-  with_first_found:
-   - "defaults/vagrant.yml"
-   - "defaults.yml"
-  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
+#- include_vars: "{{ item }}"
+#  with_first_found:
+#   - "defaults/vagrant.yml"
+#   - "defaults/defaults.yml"
+#  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
 
 # Ensure for our directories on our (local) controller.
 
@@ -67,7 +68,7 @@
 - name: "Download shorewall-core-5.0.11.0-1.el6.noarch.rpm" 
   get_url:
     url      : "http://www.invoca.ch/pub/packages/shorewall/RPMS/ils-6/noarch/{{ item.value.rpm }}"
-    dest     : "/home/ansible/sys/sw/rpms/shorewall/"
+    dest     : "/home/ansible/sys/sw/rpms/shorewall/{{ item.value.rpm }}"
     group    : "{{ item.group | default(omit) }}"
     owner    : "{{ item.owner | default(omit) }}"
     mode     : "{{ item.mode | default(omit) }}"
