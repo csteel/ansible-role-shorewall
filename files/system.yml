@@ -1,8 +1,7 @@
 ---
+# file: system.yml (site.yml)
+
 - hosts: all
   become: false
-  gather_facts: false
 
 - include: shorewall.yml
-
-
