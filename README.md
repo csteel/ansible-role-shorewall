@@ -15,6 +15,8 @@ Playbooks
 
 ### Main Playbook
 
+I like to use what I call "main" playbooks that are made up of includes for other playbooks and plays.
+
 #### Example
 
 ```yaml
@@ -27,9 +29,9 @@ Playbooks
 - include: shorewall.yml
 ```
 
-#### Copy and edit
+To copy the example:
 
-    cp roles/shorewall/files/shorewall.yml .
+    cp roles/shorewall/files/system.yml .
 
 ### Roles Playbook
 
@@ -123,6 +125,7 @@ If you are using ssh agent now might be a good time to load your ssh key...
 
 ### Run playbook
 
+If deployment_user role was applied 
     ansible-playbook system.yml -i inventory/development
 
 
