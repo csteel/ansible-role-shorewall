@@ -1,0 +1,20 @@
+---
+# file: roles/shorewall/defaults/ubuntu_16.04.yml
+
+# 16.04 uses a different naming convertion for interfaces so we need to over ride these values in defaults/main.yml
+
+
+interfaces: 
+
+  - int: "eth0"
+    zone: "net"
+    broadcast: ""
+  
+  - int: "eth1"
+    zone: "lan"
+    broadcast: ""
+
+  - int: "tun0"
+    zone: "vpn"
+    broadcast: ""
+

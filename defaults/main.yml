@@ -8,7 +8,7 @@
 #    project/group_vars/all/shorewall.yml
 #    project/group_vars/shorewall/defaults.yml
 
-shorewall_start                             : true
+shorewall_start                             : false # true when production
 
 shorewall_default_ssh_port                  : 22
 

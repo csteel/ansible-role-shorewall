@@ -320,11 +320,11 @@
 - name: "inventory_hostname  value"
   debug: var=inventory_hostname  
 
-- name: "ansible_ssh_port value"
-  debug: var=ansible_ssh_port
+- name: "shorewall_ssh_port value"
+  debug: var=shorewall_ssh_port
 
 - name: wait for the server to restart
-  local_action: wait_for host={{ inventory_hostname }} port={{ ansible_ssh_port }} search_regex=OpenSSH delay=40 timeout=300 state=started
+  local_action: wait_for host={{ inventory_hostname }} port={{ shorewall_ssh_port }} search_regex=OpenSSH delay=40 timeout=300 state=started
   become: false
 
 #- name: waiting for server to come back
