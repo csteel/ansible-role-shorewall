@@ -350,7 +350,7 @@
 # wait for target systems reboot and port 22 to become available before continuing
 
 - name: wait for the server to restart
-  local_action: wait_for host={{ inventory_hostname }} port=22 search_regex=OpenSSH delay=40 timeout=300 state=started
+  local_action: wait_for host={{ inventory_hostname }} port={{ ansible_ssh_port }} search_regex=OpenSSH delay=40 timeout=300 state=started
   become: false
 
 #- name: waiting for server to come back
