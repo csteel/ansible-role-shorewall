@@ -1,7 +1,9 @@
 ---
 # file roles/shorewall/defaults/CentOS.yml
 
-shorewall_vars_test: 'roles/shorewall/defaults/CentOS.yml'
+shorewall_resources_dir: '../ace_resources/sw/shorewall'
+
+shorewall_vars_test: 'roles/shorewall/vars/CentOS.yml'
 
 shorewall_rpms:
 

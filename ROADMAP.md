@@ -1,5 +1,9 @@
 # file: roles/shorewall/ROADMAP.md
 
+* assemble allows us to construct using diffs...
+* using assemble allows us to add a single rule for host_vars such as for a vagrant VM without needing to copy the whole.
+* using assemble allows various roles to make changes to firewall.
+* tasks/main.yml needs to take vagrant ports into consideration.
 * Ubuntu 16.04 network interface called "enp5s0" not eth0, requires 16.04 adapter_default, centOS will have similar issue.
 
 * Flush handlers near end of playbook once shorewall check is done and is configure to restart on system boot, perhaps replace current reboot sequence?

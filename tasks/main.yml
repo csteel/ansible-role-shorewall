@@ -8,49 +8,17 @@
   include_vars: "{{ item }}"
   with_first_found:
    - "defaults/{{ ansible_distribution }}.yml"
-   - "vars/{{ ansible_distribution }}.yml"
-   - "{{ ansible_os_family }}.yml"
-   - "defaults.yml"
-  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
+   - "defaults/defaults.yml"
+#   - "vars/{{ ansible_distribution }}.yml"
+#   - "{{ ansible_os_family }}.yml"
+#   - "defaults.yml"
+#  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
 
-- include_vars: "{{ item }}"
-  with_first_found:
-   - "defaults/vagrant.yml"
-   - "defaults.yml"
-  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
-
-- debug: var=shorewall_vars_test
-  tags: [ 'debug' ]
-
-# Configure /etc/services, important for Vagrant due to port forwarding
-
-- name: "Set ssh tcp and udp to be the machines forwarded port value"
-  become: true
-  lineinfile:
-    "dest='/etc/services'
-    regexp='^ssh		22/tcp'
-    line='ssh		{{ ansible_ssh_port }}/tcp				# SSH Remote Login Protocol'
-    state=present"
-
-- name: "Set ssh tcp and udp to be the machines forwarded port value"
-  become: true
-  lineinfile:
-    "dest='/etc/services'
-    regexp='^ssh		22/udp'
-    line='ssh		{{ ansible_ssh_port }}/udp				# SSH Remote Login Protocol'
-    state=present"
-
-- name: "Set ssh tcp and udp to be the machines forwarded port value"
-  become: true
-  lineinfile: "dest='/etc/services' regexp='^ssh		22/sctp' line='ssh		{{ ansible_ssh_port }}/sctp				# SSH' state=present"
-
-#- name: we set a handler to reboot system if connection is severed.
-#  command: /bin/true
-#  notify: reboot system
-#  when: ansible_connection is defined and ansible_connection != 'local'
-
-- debug: var=shorewall_controller_user
-  tags: [ 'debug' ]
+#- include_vars: "{{ item }}"
+#  with_first_found:
+#   - "defaults/vagrant.yml"
+#   - "defaults/defaults.yml"
+#  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
 
 # Ensure for our directories on our (local) controller.
 
@@ -100,7 +68,7 @@
 - name: "Download shorewall-core-5.0.11.0-1.el6.noarch.rpm" 
   get_url:
     url      : "http://www.invoca.ch/pub/packages/shorewall/RPMS/ils-6/noarch/{{ item.value.rpm }}"
-    dest     : "/home/ansible/sys/sw/rpms/shorewall/"
+    dest     : "/home/ansible/sys/sw/rpms/shorewall/{{ item.value.rpm }}"
     group    : "{{ item.group | default(omit) }}"
     owner    : "{{ item.owner | default(omit) }}"
     mode     : "{{ item.mode | default(omit) }}"
@@ -349,8 +317,14 @@
 
 # wait for target systems reboot and port 22 to become available before continuing
 
+- name: "inventory_hostname  value"
+  debug: var=inventory_hostname  
+
+- name: "shorewall_ssh_port value"
+  debug: var=shorewall_ssh_port
+
 - name: wait for the server to restart
-  local_action: wait_for host={{ inventory_hostname }} port={{ ansible_ssh_port }} search_regex=OpenSSH delay=40 timeout=300 state=started
+  local_action: wait_for host={{ inventory_hostname }} port={{ shorewall_ssh_port }} search_regex=OpenSSH delay=40 timeout=300 state=started
   become: false
 
 #- name: waiting for server to come back

@@ -1,7 +1,16 @@
 ---
 # file roles/shorewall/defaults/main.yml
 
-# you probably want to overide these in group_vars/shorewall/defaults
+# if you want to change these values you may want to overide them in files like
+# these depending on what your goals are:
+#
+#    project/host_vars/pc-001/shorewall/shorewall.yml
+#    project/group_vars/all/shorewall.yml
+#    project/group_vars/shorewall/defaults.yml
+
+shorewall_start                             : false # true when production
+
+shorewall_default_ssh_port                  : 22
 
 shorewall_deployment_user_name              : '{{ project_deployment_user_name }}'
 shorewall_controller_user_name              : '{{ project_controller_user_name }}'

@@ -4,9 +4,16 @@ rules:
 
   - action: "ACCEPT"
     src: "0.0.0.0/0"
-    dest: "$FW"    
+    dest: "$FW"
     proto: "tcp"
     port: 22
+    comment: "Public SSH"
+
+  - action: "ACCEPT"
+    src: "0.0.0.0/0"
+    dest: "$FW"    
+    proto: "tcp"
+    port: 2201
     comment: "Public SSH"
 
   - action: "ACCEPT"

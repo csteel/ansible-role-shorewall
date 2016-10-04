@@ -1,6 +1,0 @@
----
-# file: Ubuntu.yml
-
-- debug: var=ansible_distribution
-  tags: [ 'debug' ]
-
