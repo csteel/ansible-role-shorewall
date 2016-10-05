@@ -1,6 +1,10 @@
 ---
 # file: shorewall/tasks/main.yml
 
+- debug: var=shorewall_default_ssh_port
+  tags: [ 'debug' ]
+
+
 - debug: var=ansible_distribution
   tags: [ 'debug' ]
 
@@ -36,6 +40,27 @@
 # OS specific operations
 
 ## Debian specific 
+
+### get active interface
+# move to rrp?
+
+- name: "get the name of the current active interface"
+  become: true
+  shell: route | grep '^default' | grep -o '[^ ]*$'
+  ignore_errors: true
+  register: shorewall_route_default_interface
+  when: ansible_os_family == "Debian"
+  tags: [ 'packages', 'shorewall', 'interface' ]
+
+- debug: var=shorewall_route_default_interface.stdout
+  tags: [ 'debug', 'shorewall', 'interface' ]
+
+- name: Set var shorewall_active_interface
+  set_fact:
+    shorewall_active_interface: '{{ shorewall_route_default_interface.stdout }}'
+
+- debug: var=shorewall_active_interface
+  tags: [ 'debug', 'shorewall', 'interface' ]
 
 # apt update cache
 
@@ -320,11 +345,11 @@
 - name: "inventory_hostname  value"
   debug: var=inventory_hostname  
 
-- name: "shorewall_ssh_port value"
-  debug: var=shorewall_ssh_port
+- name: "shorewall_default_ssh_port value"
+  debug: var=shorewall_default_ssh_port
 
 - name: wait for the server to restart
-  local_action: wait_for host={{ inventory_hostname }} port={{ shorewall_ssh_port }} search_regex=OpenSSH delay=40 timeout=300 state=started
+  local_action: wait_for host={{ inventory_hostname }} port={{ shorewall_default_ssh_port }} search_regex=OpenSSH delay=40 timeout=300 state=started
   become: false
 
 #- name: waiting for server to come back

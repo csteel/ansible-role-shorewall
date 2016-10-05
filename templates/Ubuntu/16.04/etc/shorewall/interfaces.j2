@@ -22,6 +22,7 @@
 ?FORMAT 2
 ###############################################################################
 #ZONE		INTERFACE		OPTIONS
+net	{{ shorewall_active_interface }}
 {% for i in interfaces %}
 {{ i.zone }}    {{ i.int }}    {% if i.broadcast is defined %}{{ i.broadcast }}{% else %}{% endif %}    {% if i.options is defined %}{{ i.options }}{% else %}{% endif %}
 
