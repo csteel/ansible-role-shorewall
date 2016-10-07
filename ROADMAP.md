@@ -16,6 +16,8 @@
     
     SHELL cat /etc/shorewall/rules.d/rules.* 2> /dev/null || true
 
+http://shorewall.net/configuration_file_basics.htm
+
 ### Advantages
 
 * no long variable files with lots of duplications.
