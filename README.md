@@ -21,7 +21,7 @@ I like to use what I call "main" playbooks that are made up of includes for othe
 
 ```yaml
 ---
-# file: system.yml (site.yml)
+# file: systems.yml (systems.yml)
 
 - hosts: all
   become: false
@@ -31,7 +31,7 @@ I like to use what I call "main" playbooks that are made up of includes for othe
 
 To copy the example:
 
-    cp roles/shorewall/files/system.yml .
+    cp roles/shorewall/files/systems.yml .
 
 ### Roles Playbook
 
@@ -80,25 +80,34 @@ Once everything is working as it should you will probably want to customize the 
 
 ### Playbook Example
 
-#### project/site.yml
+#### project/systems.yml
 
 This setup allows for the easy addition of roles as well as a lot of control on role parameters.
 
-    ---
-    # file: project/site.yml
-    - hosts: all
-      gather_facts: false
-    
-    - include: shorewall.yml
+```yaml
+---
+# file: system.yml           
 
+- hosts: all
+  become: false
+
+#- include: deployment_user.yml
+- include: shorewall.yml
+```
 
 #### project/shorewall.yml
 
-    ---
-    # file: project/shorewall.yml
-    - hosts: shorewall
-      roles:
-         - { role: shorewall }
+```yaml
+---
+# file: shorewall.yml
+
+- hosts: shorewall
+  user: '{{ ansible_ssh_user}}'
+  become: true
+  gather_facts: true
+  roles:
+    - shorewall
+```
 
 Inventory
 ---------
@@ -126,9 +135,9 @@ If you are using ssh agent now might be a good time to load your ssh key...
 ### Run playbook
 
 If deployment_user role was applied 
-    ansible-playbook system.yml -i inventory/development
+    ansible-playbook systems.yml -i inventory/development
 
 
-    ansible-playbook system.yml --ask-become-pass
+    ansible-playbook systems.yml --ask-become-pass
 
 

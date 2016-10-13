@@ -312,7 +312,7 @@
   become: true
   shell: systemctl enable shorewall
   register: shorewall_systemctl_check
-  when: ansible_distribution_version is defined and ansible_distribution_version == "16.04"
+  when: ansible_distribution_version is defined and ansible_distribution_version == "16.04" or ansible_distribution_version == "15.04"
   tags: [ 'packages', 'shorewall', 'shorewall_systemctl_check' ]
 
 - debug: var=shorewall_systemctl_check

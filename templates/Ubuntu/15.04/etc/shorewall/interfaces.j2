@@ -1,0 +1,17 @@
+################################################################################
+# {{ ansible_managed }}
+#
+# /etc/shorewall/interfaces
+# root:root 644
+# Used by service: Shorewall 
+#
+# Shorewall interfaces file
+#
+# 0.1 2016-06-13 - csteel - Initial file
+###############################################################################
+#ZONE   INTERFACE   BROADCAST   OPTIONS
+{% for i in interfaces %}
+{{ i.zone }}    {{ i.int }}    {% if i.broadcast is defined %}{{ i.broadcast }}{% else %}{% endif %}    {% if i.options is defined %}{{ i.options }}{% else %}{% endif %}
+
+{% endfor %}
+
