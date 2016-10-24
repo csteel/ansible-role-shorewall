@@ -1,0 +1,60 @@
+---
+#file: group_vars/shorewall/shorewall_config
+
+zones:
+
+  - name: "fw"
+    type: "firewall"
+
+  - name: "net"
+    type: "ipv4"
+
+#  - name: "lan"
+#    type: "ipv4"
+
+#  - name: "vpn"
+#    type: "ipv4"
+
+interfaces: 
+
+  - int: "eth0"
+    zone: "net"
+    broadcast: ""
+  
+#  - int: "eth1"
+#    zone: "lan"
+#    broadcast: ""
+
+#  - int: "tun0"
+#    zone: "vpn"
+#    broadcast: ""
+
+masq: []
+
+policies:
+
+  - src: "$FW"
+    dst: "net"
+    policy: "ACCEPT"
+    log_level: ""
+
+  - src: "net"
+    dst: "$FW"
+    policy: "DROP"
+    log_level: "info"
+
+#  - src: "net"
+#    dst: "all"
+#    policy: "DROP"
+#    log_level: "info"
+
+#  - src: "lan"
+#    dst: "all"
+#    policy: "ACCEPT"
+#    log_level: ""
+
+#  - src: "vpn"
+#    dst: "all"
+#    policy: "ACCEPT"
+#    log_level: ""
+

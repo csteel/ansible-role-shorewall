@@ -1,0 +1,9 @@
+---
+# file: host_vars/host/shorewall/active_interface.yml
+
+interfaces:
+
+  - int: "{{ shorewall_active_interface }}"
+    zone: "net"
+    broadcast: ""
+
