@@ -4,7 +4,6 @@
 - debug: var=shorewall_default_ssh_port
   tags: [ 'debug' ]
 
-
 - debug: var=ansible_distribution
   tags: [ 'debug' ]
 
@@ -13,20 +12,17 @@
   with_first_found:
    - "defaults/{{ ansible_distribution }}.yml"
    - "defaults/defaults.yml"
-#   - "vars/{{ ansible_distribution }}.yml"
-#   - "{{ ansible_os_family }}.yml"
-#   - "defaults.yml"
-#  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
-
-#- include_vars: "{{ item }}"
-#  with_first_found:
-#   - "defaults/vagrant.yml"
-#   - "defaults/defaults.yml"
-#  when: "'{{ ansible_ssh_user }}' == 'vagrant'"
 
 # Ensure for our directories on our (local) controller.
+# 
 
-- name: ensure for directories
+- name: "ensure for host_vars {{ ansible_hostname }} shorewall interfaces"
+  become: false
+  local_action: file
+    path=host_vars/{{ ansible_hostname }}/shorewall
+    state=directory
+
+- name: "ensure for archiving directories on controller"
   become: false
   local_action: file
     path='{{ item.path }}'
@@ -37,11 +33,10 @@
     - { path: "{{ shorewall_fetched_files_original_root }}" }
     - { path: "{{ shorewall_fetched_files_previous_root }}" }
 
-# OS specific operations
+- debug: var='{{ ansible_hostname }}'
+  tags: [ 'debug' ]
 
-## Debian specific 
-
-### get active interface
+## get active interface
 # move to rrp?
 
 - name: "get the name of the current active interface"
@@ -61,6 +56,18 @@
 
 - debug: var=shorewall_active_interface
   tags: [ 'debug', 'shorewall', 'interface' ]
+
+# template our active interface to our shorewall inteface config file
+
+- name: "running our interface.j2 templates on a per host basis"
+  local_action: template
+    backup=yes
+    src='host_vars/shorewall/interfaces.j2'
+    dest='host_vars/{{ ansible_hostname }}/shorewall'
+
+# OS specific operations
+
+## Debian specific 
 
 # apt update cache
 
