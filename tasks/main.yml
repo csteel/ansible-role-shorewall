@@ -37,7 +37,6 @@
   tags: [ 'debug' ]
 
 ## get active interface
-# move to rrp?
 
 - name: "get the name of the current active interface"
   become: true
@@ -359,9 +358,10 @@
   local_action: wait_for host={{ inventory_hostname }} port={{ shorewall_default_ssh_port }} search_regex=OpenSSH delay=40 timeout=300 state=started
   become: false
 
-#- name: waiting for server to come back
-#  local_action: wait_for host={{ inventory_hostname }} state=started delay=30 timeout=300
-#  sudo: false
+- name: "pause when os is ubuntu 16.04 cause it takes a bit longer for shorewall to start for some reason"
+  pause: seconds=10
+  when: ansible_distribution_version == "16.04"
+
 
 # Check shorewall status, did it start, is it running?
 
@@ -370,6 +370,7 @@
   shell: shorewall status
   register: shorewall_status
   tags: [ 'packages', 'shorewall', 'status' ]
+#  when: ansible_distribution_version <= "14.04"
 
 - debug: var=shorewall_status
 
