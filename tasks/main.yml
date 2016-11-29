@@ -7,6 +7,12 @@
 - debug: var=ansible_distribution
   tags: [ 'debug' ]
 
+- debug: var=ansible_os_family
+  tags: [ 'debug' ]
+
+- debug: var=ansible_hostname
+  tags: [ 'debug' ]
+
 - name: "include defaults/'{{ ansible_distribution }}.yml'"
   include_vars: "{{ item }}"
   with_first_found:
@@ -32,9 +38,6 @@
     - { path: "{{ shorewall_fetched_files_history_root }}" }
     - { path: "{{ shorewall_fetched_files_original_root }}" }
     - { path: "{{ shorewall_fetched_files_previous_root }}" }
-
-- debug: var='{{ ansible_hostname }}'
-  tags: [ 'debug' ]
 
 ## get active interface
 
@@ -237,18 +240,6 @@
     state='present'
   tags: [ 'packages', 'shorewall', 'shorewall_check' ]
 
-# Configure shorewall to start on system boot as we are still able to connect.
-
-- name: Set `startup=1` in `/etc/default/shorewall` so shorewall is started on boot.
-  become: true
-  lineinfile:
-    dest='/etc/default/shorewall'
-    regexp='^startup=0'
-    line='startup=1'
-    state='present'
-  when: ansible_distribution == "Ubuntu"
-  tags: [ 'packages', 'shorewall', 'shorewall_check' ]
-
 # Check shorewall status
 
 - name: check shorewall status
@@ -296,10 +287,26 @@
 - debug: var=shorewall_status
   tags: [ 'packages', 'shorewall', 'status' ]
 
+# Fail if shorewall is not running
+
 - name: 1st test, fail if shorewall is not running
   fail: msg="1st test, shorewall failed to start on {{ inventory_hostname }}!!!"
   when: shorewall_status.stdout.find('Shorewall is running') == -1
   tags: [ 'packages', 'shorewall', 'status' ]
+
+# Configure shorewall to start on system boot as we are still able to connect.
+#
+# required for 12.04 and perhaps others?
+
+- name: Set `startup=1` in `/etc/default/shorewall` so shorewall is started on boot.
+  become: true
+  lineinfile:
+    dest='/etc/default/shorewall'
+    regexp='^startup=0'
+    line='startup=1'
+    state='present'
+  when: ansible_distribution == "Ubuntu"
+  tags: [ 'packages', 'shorewall', 'shorewall_check' ]
 
 # Set shorewall to start on boot.
 # * REQUIRED FOR Ubuntu 16.04
@@ -354,7 +361,7 @@
 - name: "shorewall_default_ssh_port value"
   debug: var=shorewall_default_ssh_port
 
-- name: wait for the server to restart
+- name: "waiting for target server to restart - 40 second deplay"
   local_action: wait_for host={{ inventory_hostname }} port={{ shorewall_default_ssh_port }} search_regex=OpenSSH delay=40 timeout=300 state=started
   become: false
 
@@ -381,7 +388,7 @@
 # Now that shorewall is installed, configured and running we will disable ufw
 
 - name: "Ubuntu - SUCCESS - Shorewall installed, configured and running, disabling ufw"
-  become: true
+  become: true  
   shell: ufw disable
   tags: [ 'packages', 'shorewall' ]
   when: ansible_distribution == "Ubuntu"
