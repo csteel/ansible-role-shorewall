@@ -70,9 +70,9 @@ shorewall_fetched_files_previous_root: '{{ shorewall_fetched_files_root }}/previ
 
 shorewall_config_files:
 
-  etc_defaults_shorewall:
-    src  : 'etc/defaults/shorewall'
-    dest : 'etc/defaults/shorewall'
+  etc_default_shorewall:
+    src  : 'etc/default/shorewall'
+    dest : '/etc/default/shorewall'
     group: 'root'
     owner: 'root'
     mode: '644'
