@@ -8,6 +8,8 @@
 #    project/group_vars/all/shorewall.yml
 #    project/group_vars/shorewall/defaults.yml
 
+shorewall_restart_workstation               : 'false'
+shorewall_startup_value			    : '0'   # startup=1 or 0 in /etc/defaults/shorewall
 shorewall_start                             : false # true when production
 shorewall_default_ssh_port                  : '22'
 
@@ -67,6 +69,13 @@ shorewall_fetched_files_previous_root: '{{ shorewall_fetched_files_root }}/previ
 ## Back to 
 
 shorewall_config_files:
+
+  etc_defaults_shorewall:
+    src  : 'etc/defaults/shorewall'
+    dest : 'etc/defaults/shorewall'
+    group: 'root'
+    owner: 'root'
+    mode: '644'
 
   zones:
     src: 'etc/shorewall/zones'

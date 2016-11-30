@@ -304,7 +304,7 @@
     dest='/etc/default/shorewall'
     regexp='^startup=0'
     line='startup=1'
-    state='present'
+#    state='present'
   when: ansible_distribution == "Ubuntu"
   tags: [ 'packages', 'shorewall', 'shorewall_check' ]
 
@@ -345,30 +345,30 @@
 #  poll: 0
 #  ignore_errors: true
 
-- name: restart machine
+- name: "reboot the system to test firewall start on boot"
   shell: sleep 2 && shutdown -r now "Ansible actuated reboot to test firewall start on boot"
   async: 1
   poll: 0
   become: true
   ignore_errors: true
-  when: ansible_connection != 'local'
+  register: restart_system_firewall_test
+  when: ansible_connection != 'local' and shorewall_restart_workstation is defined and shorewall_restart_workstation == 'true'
+
+- debug: var=restart_system_firewall_test
 
 # wait for target systems reboot and port 22 to become available before continuing
-
-- name: "inventory_hostname  value"
-  debug: var=inventory_hostname  
-
-- name: "shorewall_default_ssh_port value"
-  debug: var=shorewall_default_ssh_port
+#
+# TRICKY, this uses `local_action` so you testing for localhost always returns true.
+#
 
 - name: "waiting for target server to restart - 40 second deplay"
   local_action: wait_for host={{ inventory_hostname }} port={{ shorewall_default_ssh_port }} search_regex=OpenSSH delay=40 timeout=300 state=started
   become: false
+  when: restart_system_firewall_test.started is defined and restart_system_firewall_test.started == 1
 
 - name: "pause when os is ubuntu 16.04 cause it takes a bit longer for shorewall to start for some reason"
   pause: seconds=10
-  when: ansible_distribution_version == "16.04"
-
+  when: restart_system_firewall_test.started is defined and restart_system_firewall_test.started == 1 and ansible_distribution_version == '16.04'
 
 # Check shorewall status, did it start, is it running?
 
