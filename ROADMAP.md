@@ -1,5 +1,9 @@
 # file: roles/shorewall/ROADMAP.md
 
+##
+
+* do we need template for /etc/default/shorewall for ubuntun 14.04 and/or 16.04?
+
 ## Comment format change
 
 ### 14.04 - Shorewall-4.4.26.1
