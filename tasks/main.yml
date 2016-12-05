@@ -65,7 +65,10 @@
   local_action: template
     backup=yes
     src='host_vars/shorewall/interfaces.j2'
-    dest='host_vars/{{ ansible_hostname }}/shorewall'
+    dest='host_vars/{{ ansible_hostname }}/shorewall/interfaces.yml'
+
+- name: "include defaults/'{{ ansible_distribution }}.yml'"
+  include_vars: 'host_vars/{{ ansible_hostname }}/shorewall/interfaces.yml'
 
 # OS specific operations
 
@@ -278,20 +281,20 @@
 
 # Check shorewall status, did it start, is it running?
 
-- name: check shorewall status
+- name: "run shorewall status command"
   become: true
   shell: shorewall status
-  register: shorewall_status
+  register: shorewall_status_command
   tags: [ 'packages', 'shorewall', 'status' ]
 
-- debug: var=shorewall_status
+- debug: var=shorewall_status_command
   tags: [ 'packages', 'shorewall', 'status' ]
 
 # Fail if shorewall is not running
 
 - name: 1st test, fail if shorewall is not running
   fail: msg="1st test, shorewall failed to start on {{ inventory_hostname }}!!!"
-  when: shorewall_status.stdout.find('Shorewall is running') == -1
+  when: shorewall_status_command.stdout.find('Shorewall is running') == -1
   tags: [ 'packages', 'shorewall', 'status' ]
 
 # Configure shorewall to start on system boot as we are still able to connect.
@@ -311,7 +314,6 @@
 # Set shorewall to start on boot.
 # * REQUIRED FOR Ubuntu 16.04
 # https://docs.ansible.com/ansible/systemd_module.html
-#
 # Example action to restart service cron on centos, in all cases, also issue deamon-reload to pick up config changes
 #
 #- systemd: name=httpd state=reloaded
