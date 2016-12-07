@@ -354,7 +354,7 @@
   become: true
   ignore_errors: true
   register: restart_system_firewall_test
-  when: ansible_connection != 'local' and shorewall_restart_workstation is defined and shorewall_restart_workstation == 'yes'
+  when: ansible_connection != 'local' and shorewall_restart_workstation == 'yes'
 
 - debug: var=restart_system_firewall_test
 
