@@ -8,7 +8,10 @@ Ansible role for installing and configuring Shorewall.
 
 ### Under construction
 
-Currently working for Ubuntu (12.04, 14.04) in process of adding CentOS (6) / shorwall 5 support.
+* Currently working for Ubuntu (12.04, 14.04, 16.04) 
+* In process of adding CentOS (6) / shorwall 5 support via RPM's
+* CentOS 7 offers shorewall 5.0.1.8 via epel now.
+* Client now considering switch to firewalld
 
 Playbooks
 ---------
