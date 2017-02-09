@@ -8,7 +8,7 @@
 #    project/group_vars/all/shorewall.yml
 #    project/group_vars/shorewall/defaults.yml
 
-shorewall_restart_workstation               : 'false'
+shorewall_workstation_reboot               : 'false'
 shorewall_startup_value			    : '0'   # startup=1 or 0 in /etc/defaults/shorewall
 shorewall_start                             : false # true when production
 shorewall_default_ssh_port                  : '22'

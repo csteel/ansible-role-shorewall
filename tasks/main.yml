@@ -104,15 +104,15 @@
 
 - name: "Download shorewall-core-5.0.11.0-1.el6.noarch.rpm" 
   get_url:
-    url      : "http://www.invoca.ch/pub/packages/shorewall/RPMS/ils-6/noarch/{{ item.value.rpm }}"
-    dest     : "/home/ansible/sys/sw/rpms/shorewall/{{ item.value.rpm }}"
-    group    : "{{ item.group | default(omit) }}"
-    owner    : "{{ item.owner | default(omit) }}"
-    mode     : "{{ item.mode | default(omit) }}"
-    others   : "{{ item.others | default(omit) }}"
-    sha256sum: "{{ item.sha256sum | default(omit) }}"
-  with_dict : shorewall_rpms
-  when: ansible_distribution == "CentOS" 
+    url      : 'http://www.invoca.ch/pub/packages/shorewall/RPMS/ils-6/noarch/{{ item.value.rpm }}'
+    dest     : '/home/ansible/sys/sw/rpms/shorewall/{{ item.value.rpm }}'
+    group    : '{{ item.group | default(omit) }}'
+    owner    : '{{ item.owner | default(omit) }}'
+    mode     : '{{ item.mode | default(omit) }}'
+    others   : '{{ item.others | default(omit) }}'
+    sha256sum: '{{ item.sha256sum | default(omit) }}'
+  with_dict  : '{{ shorewall_rpms }}'
+  when: ansible_distribution == 'CentOS'
 
 - name: "CentOS - installing shorewall requirements"
   become: true
@@ -131,7 +131,7 @@
   yum:
     pkg="/home/ansible/sys/sw/rpms/shorewall/{{ item.value.rpm }}"
     state=present
-  with_dict: shorewall_rpms
+  with_dict : '{{ shorewall_rpms }}'
   when: ansible_distribution == "CentOS"
 
 # Originals
@@ -354,7 +354,7 @@
   become: true
   ignore_errors: true
   register: restart_system_firewall_test
-  when: ansible_connection != 'local' and shorewall_restart_workstation == 'yes'
+  when: ansible_connection != 'local' and shorewall_workstation_reboot == 'yes'
 
 - debug: var=restart_system_firewall_test
 

@@ -1,8 +1,9 @@
+
 [ansible.role.shorewall](https://github.com/csteel/ansible-role-shorewall)
 ======================
 
 * [](https://github.com/csteel/ansible-role-shorewall)
-[![Build Status](https://travis-ci.org/csteel/ansible-role-shorewall.svg?branch=master)](https://travis-ci.org/csteel/ansible-role-shorewall)
+  [![Build Status](https://travis-ci.org/csteel/ansible-role-shorewall.svg?branch=master)](https://travis-ci.org/csteel/ansible-role-shorewall)
 
 Ansible role for installing and configuring Shorewall.
 
@@ -12,6 +13,7 @@ Ansible role for installing and configuring Shorewall.
 * In process of adding CentOS (6) / shorwall 5 support via RPM's
 * CentOS 7 offers shorewall 5.0.1.8 via epel now.
 * Client now considering switch to firewalld
+
 
 Playbooks
 ---------
@@ -57,6 +59,7 @@ To edit:
   roles:
     - shorewall
 ```
+
 
 Role Variables
 --------------
@@ -112,6 +115,7 @@ This setup allows for the easy addition of roles as well as a lot of control on 
     - shorewall
 ```
 
+
 Inventory
 ---------
 
@@ -139,6 +143,6 @@ If you are using ssh agent now might be a good time to load your ssh key...
 
 If deployment_user role was applied 
     ansible-playbook systems.yml -i inventory/dev
-    ansible-playbook systems.yml -i inventory/dev --extra-vars "shorewall_restart_workstation='true'"
+    ansible-playbook systems.yml -i inventory/dev --extra-vars "shorewall_workstation_reboot='true'"
 
 
