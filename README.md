@@ -146,4 +146,19 @@ If deployment_user role was applied
     ansible-playbook systems.yml -i inventory/dev
     ansible-playbook systems.yml -i inventory/dev --extra-vars "shorewall_workstation_reboot='true'" --limit ace-ws-60
 
+## License
 
+MIT
+
+## Author Information
+
+Christopher Steel
+Systems Administrator
+McGill Centre for Integrative Neuroscience
+Montreal Neurological Institute
+McGill University
+3801 University Street
+Montréal, QC, Canada H3A 2B4
+Tel. No. +1 514 398-2494
+E-mail: christopherDOTsteel@mcgill.ca
+[MCIN](http://mcin-cnim.ca/), [theneuro.ca](http://theneuro.ca)
