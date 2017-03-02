@@ -144,7 +144,7 @@ If you are using ssh agent now might be a good time to load your ssh key...
 
 If deployment_user role was applied 
     ansible-playbook systems.yml -i inventory/dev
-    ansible-playbook systems.yml -i inventory/dev --extra-vars "shorewall_workstation_reboot='true'" --limit ace-ws-60
+    ansible-playbook systems.yml -i inventory/dev --extra-vars "shorewall_workstation_reboot='true'" --limit workstation-001
 
 ## License
 
