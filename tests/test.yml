@@ -208,5 +208,5 @@
           comment: "Vagrant ssh via port forwarding to port 2201"
 
   roles:
-    - ansible.role.shorewall
+    - ansible-role-shorewall
 

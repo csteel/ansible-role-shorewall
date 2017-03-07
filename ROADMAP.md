@@ -1,6 +1,8 @@
 # file: roles/shorewall/ROADMAP.md
 
-##
+## Testing
+
+* set up Travis testing?
 
 * do we need template for /etc/default/shorewall for ubuntun 14.04 and/or 16.04?
 
