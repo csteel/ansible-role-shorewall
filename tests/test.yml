@@ -1,6 +1,212 @@
 ---
+# file: roles/shorewall/tests/test.yml
+#
+# Description: Travis CI testing
+
 - hosts: localhost
-  connection: local
-  sudo: true
+  remote_user: root
+  vars:
+
+    - shorewall_workstation_reboot               : 'false'
+    - shorewall_startup_value			         : '0'   # startup=1 or 0 in /etc/defaults/shorewall
+    - shorewall_start                            : false # true when production
+    - shorewall_default_ssh_port                 : '22'
+ 
+    - shorewall_deployment_user_name              : 'root'
+    - shorewall_controller_user_name              : 'root'
+
+    - start_shorewall                             : 'false'
+
+    - shorewall_backup_original_config            : 'true'
+    - shorewall_backup_current_config             : 'false'
+    - shorewall_backup_current_config_to_history  : 'false'
+
+# rpms are defined in defaults/CentOS. We **must** set this to be an empty dictionary or 
+# runs on nodes with an os other than CentOS will not work, could use "when defined instead.
+
+    - shorewall_rpms: {}
+
+# fixed time stamp creation 
+#
+# This is used to create our history directories
+
+    - shorewall_date_time_stamp: '{{ ansible_date_time.date }}--{{ ansible_date_time.hour }}-{{ ansible_date_time.minute }}-{{ ansible_date_time.second }}--{{ ansible_date_time.tz }}'
+    - shorewall_fixed_date_time_stamp: "{{ shorewall_date_time_stamp }}"
+
+# following must remain in defaults/main.yml as it is referred to by a role dependency in meta/main.yml
+
+    - shorewall_ensure_dirs_on_remote:
+
+        home_user_sys_sw_rpms:
+
+          state          : "directory"
+          path           : "/home/ansible/sys/sw/rpms/shorewall"
+          owner          : '{{ shorewall_deployment_user_name }}'
+          group          : '{{ shorewall_deployment_user_name }}'
+          mode           : '0755'
+
+# this could be called `shorewall_ensure_dirs_on_local_all_os`
+
+    - shorewall_ensure_dirs_on_local:
+
+        ace_fetched_files_dir:
+
+          state       : "directory"
+          path        : "../ace_fetched_files"
+          owner       : '{{ shorewall_controller_user_name }}'
+          group       : '{{ shorewall_controller_user_name }}'
+          mode        : '0755'
+
+# defaults file for shorewall
+
+    - shorewall_fetched_files_root: '../ace_fetched_files'
+    - shorewall_fetched_files_history_root: '{{ shorewall_fetched_files_root }}/history/{{ shorewall_fixed_date_time_stamp }}'
+    - shorewall_fetched_files_original_root: '{{ shorewall_fetched_files_root }}/original'
+    - shorewall_fetched_files_previous_root: '{{ shorewall_fetched_files_root }}/previous'
+
+## Back to 
+
+    - shorewall_config_files:
+
+        etc_default_shorewall:
+
+          src  : 'etc/default/shorewall'
+          dest : '/etc/default/shorewall'
+          group: 'root'
+          owner: 'root'
+          mode : '644'
+
+        zones:
+          src: 'etc/shorewall/zones'
+          dest: '/etc/shorewall/zones'
+          owner: 'root'
+          group: 'root'
+          mode: '600'
+
+        interfaces:
+
+          src: 'etc/shorewall/interfaces'
+          dest: '/etc/shorewall/interfaces'
+          owner: 'root'
+          group: 'root'
+          mode: '600'
+
+        policy:
+
+          src: 'etc/shorewall/policy'
+          dest: '/etc/shorewall/policy'
+          loglevel: ''
+          owner: 'root'
+          group: 'root'
+          mode: '600'
+
+        rules:
+
+          src: 'etc/shorewall/rules'
+          dest: '/etc/shorewall/rules'
+          owner: 'root'
+          group: 'root'
+          mode: '600'
+
+        shorewall.conf:
+          src: 'etc/shorewall/shorewall.conf'
+          dest: '/etc/shorewall/shorewall.conf'
+          owner: 'root'
+          group: 'root'
+          mode: '600'
+
+    - shorewall_masq_file:
+
+        masq:
+          src: 'etc/shorewall/masq'
+          dest: '/etc/shorewall/masq'
+          owner: 'root'
+          group: 'root'
+          mode: '600'
+
+    - zones:
+        name: "fw"
+        type: "firewall"
+
+        name: "net"
+        type: "ipv4"
+
+        name: "lan"
+        type: "ipv4"
+
+        name: "vpn"
+        type: "ipv4"
+
+    - interfaces: 
+
+        int: "eth0"
+        zone: "net"
+        broadcast: ""
+  
+        int: "eth1"
+        zone: "lan"
+        broadcast: ""
+
+        int: "tun0"
+        zone: "vpn"
+        broadcast: ""
+
+    - masq: []
+
+    - policies:
+
+        src: "$FW"
+        dst: "net"
+        policy: "ACCEPT"
+        log_level: ""
+
+        src: "net"
+        dst: "$FW"
+        policy: "DROP"
+        log_level: "info"
+
+        src: "lan"
+        dst: "all"
+        policy: "ACCEPT"
+        log_level: ""
+
+        src: "vpn"
+        dst: "all"
+        policy: "ACCEPT"
+        log_level: ""
+
+    - rules:
+
+        rules:
+
+          action: "ACCEPT"
+          src: "0.0.0.0/0"
+          dest: "$FW"    
+          proto: "tcp"
+          port: 22
+          comment: "Public SSH"
+
+          action: "ACCEPT"
+          src: "0.0.0.0/0"
+          dest: "$FW"
+          proto: "tcp"
+          port: 2222
+          comment: "Vagrant ssh via port forwarding to port 2222"
+
+          action: "ACCEPT"
+          src: "0.0.0.0/0"
+          dest: "$FW"
+          proto: "tcp"
+          port: 2200
+          comment: "Vagrant ssh via port forwarding to port 2201"
+
+          action: "ACCEPT"
+          src: "0.0.0.0/0"
+          dest: "$FW"
+          proto: "tcp"
+          port: 2201
+          comment: "Vagrant ssh via port forwarding to port 2201"
+
   roles:
-    - ../../
+    - ansible.role.shorewall
+
