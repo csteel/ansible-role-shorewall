@@ -1,6 +1,10 @@
 # temp files
 *~
 
+.vagrant/
+host_vars/
+
+
 *.swp
 
 # private files
