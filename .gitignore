@@ -3,7 +3,7 @@
 
 .vagrant/
 host_vars/
-
+ubuntu-xenial-16.04-cloudimg-console.log
 
 *.swp
 
