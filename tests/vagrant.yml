@@ -1,23 +1,22 @@
 # test file for virtualbox
 ---
 - hosts: all
-  remote_user: vagrant
-  sudo: true
-  vars:
+  remote_user: ubuntu
+  become: true
   vars:
 
-    - shorewall_workstation_reboot               : 'false'
-    - shorewall_startup_value			         : '0'   # startup=1 or 0 in /etc/defaults/shorewall
-    - shorewall_start                            : false # true when production
-    - shorewall_default_ssh_port                 : '22'
+    - shorewall_workstation_reboot      : 'false'
+    - shorewall_startup_value           : '0'   # startup=1 or 0 in /etc/defaults/shorewall
+    - shorewall_start                   : false # true when production
+    - shorewall_default_ssh_port        : '22'
  
-    - shorewall_deployment_user_name              : 'vagrant'
-    - shorewall_controller_user_name              : 'csteel'
+    - shorewall_deployment_user_name : 'ubuntu'
+    - shorewall_controller_user_name : 'csteel'
 
-    - start_shorewall                             : 'false'
+    - start_shorewall                  : 'false'
 
-    - shorewall_backup_original_config            : 'true'
-    - shorewall_backup_current_config             : 'false'
+    - shorewall_backup_original_config : 'false'
+    - shorewall_backup_current_config  : 'false'
     - shorewall_backup_current_config_to_history  : 'false'
 
 # rpms are defined in defaults/CentOS. We **must** set this to be an empty dictionary or 
