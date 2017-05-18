@@ -1,11 +1,34 @@
 
-[ansible.role.shorewall](https://github.com/csteel/ansible-role-shorewall)
+[ansible-role-shorewall](https://github.com/csteel/ansible-role-shorewall)
 ======================
 
 * [](https://github.com/csteel/ansible-role-shorewall)
   [![Build Status](https://travis-ci.org/csteel/ansible-role-shorewall.svg?branch=master)](https://travis-ci.org/csteel/ansible-role-shorewall)
 
 Ansible role for installing and configuring Shorewall.
+
+## Quick Start
+
+If everything is setup and configure then:
+
+### Ansible command examples
+
+#### For production system
+
+```shell
+ansible-playbook systems.yml -i inventory/dev \
+--extra-vars "shorewall_workstation_reboot='true'" \
+--limit workstation-001
+```
+
+#### For new systems
+
+```shell
+ansible-playbook systems.yml -i inventory/dev \
+--limit workstation-001
+```
+
+
 
 ### Under construction
 
