@@ -139,7 +139,7 @@ nano ~/projects/your_project/host_vars/workstation-001/shorewall/custom_firewall
 * Example content for adding firewall rules that allow Synergy screen sharing:
 
 ```shell
-# Firewall rules for Synergy usage via McGill wireless / lab network
+# Firewall rules for Synergy usage via wireless / lab network
 # [[http://symless.com/synergy/] Synergy is software for sharing one keyboard and mouse between multiple computers.]
 #
 
