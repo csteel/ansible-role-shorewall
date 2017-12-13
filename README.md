@@ -1,5 +1,5 @@
 
-[ansible.role.shorewall](https://github.com/csteel/ansible-role-shorewall)
+[ansible-role-shorewall](https://github.com/csteel/ansible-role-shorewall)
 ======================
 
 * [](https://github.com/csteel/ansible-role-shorewall)
@@ -7,13 +7,43 @@
 
 Ansible role for installing and configuring Shorewall.
 
-### Under construction
+## Quick Start
 
-* Currently working for Ubuntu (12.04, 14.04, 16.04) 
-* In process of adding CentOS (6) / shorwall 5 support via RPM's
-* CentOS 7 offers shorewall 5.0.1.8 via epel now.
-* Client now considering switch to firewalld
+### Controller prep
 
+#### Virtual environment
+
+If you are using or some other virtual environment
+
+```shell
+source activate ansible-2.1
+```
+
+#### ssh agent
+
+If you are using ssh agent now might be a good time to load your ssh key...
+
+```
+eval `ssh-agent -s`
+/usr/bin/ssh-add
+```
+
+### Ansible command examples
+
+#### production system
+
+```shell
+ansible-playbook systems.yml -i inventory/dev \
+--limit workstation-001
+```
+
+#### new systems
+
+```shell
+ansible-playbook systems.yml -i inventory/dev \
+--extra-vars "shorewall_workstation_reboot='true'" \
+--limit workstation-001
+```
 
 
 Playbooks
@@ -21,7 +51,9 @@ Playbooks
 
 ### Main Playbook
 
-I like to use what I call "main" playbooks that are made up of includes for other playbooks and plays.
+`~/projects/project/systems.yml`
+
+**main playbooks** are top level playbook(s) that contain multiple **includes** of role playbooks or other types of playbooks. Ansible conventions usually refer to them by the filename **site.yml**. Here we use the name  **systems.yml**.
 
 #### Example
 
@@ -33,13 +65,16 @@ I like to use what I call "main" playbooks that are made up of includes for othe
   become: false
 
 - include: shorewall.yml
+- include: workstation.yml
+- include: research_workstation.yml
+...
 ```
 
 To copy the example:
 
     cp roles/shorewall/files/systems.yml .
 
-### Roles Playbook
+### Role Playbook
 
 An example is included in roles/shorewall/files/shorewall.yml if you would like to use it for role testing:
 
@@ -62,7 +97,7 @@ To edit:
 ```
 
 
-Role Variables
+Variables
 --------------
 
 ### role/shorewall/defaults/main.yml
@@ -84,6 +119,43 @@ New variable added for testing new firewall configurations:
 ### group_vars/shorewall/defaults.yml
 
 Once everything is working as it should you will probably want to customize the firewall for your site. Site wide rules can be place in `group_vars/shorewall/defaults.yml`. **Using this location also keeps your sites rules out of the roles repository**.
+
+### host_vars/workstation-001/shorewall/customization_name.yml
+
+A directory structure in this format **`host_vars/workstation_name/role_name/customization_name.yml`**allows firewall customizations on a per host basis. Here is a step by step example that adds additional firewall rules to workstation-001 only:
+
+* Create a the directory structure
+
+```shell
+mkdir -p ~/projects/your_project/host_vars/workstation-001/shorewall
+```
+
+* Open our per host firewall customization file for editing:
+
+```shell
+nano ~/projects/your_project/host_vars/workstation-001/shorewall/custom_firewall_rules_for_synergy.yml
+```
+
+* Example content for adding firewall rules that allow Synergy screen sharing:
+
+```shell
+# Firewall rules for Synergy usage via wireless / lab network
+# [[http://symless.com/synergy/] Synergy is software for sharing one keyboard and mouse between multiple computers.]
+#
+
+- action: "ACCEPT"
+  src: "125.226.334.0/24"
+  dest: "$FW"
+  proto: "tcp"
+  port: 24800
+  comment: "# Permit access to Synergy via Wifi - Ticket 111181"
+- action: "ACCEPT"
+  src: "125.226.333.0/24"
+  dest: "$FW"
+  proto: "tcp"
+  port: 24800
+  comment: "# Permit access to Synergy via network - Ticket 111181"
+```
 
 ### Playbook Example
 
@@ -132,13 +204,6 @@ This example should work for production and development once the deployment_user
 system-001 ansible_ssh_user=deployer
 ```
 ## Ansible command example
-
-### ssh agent
-
-If you are using ssh agent now might be a good time to load your ssh key...
-
-    eval `ssh-agent -s`
-    /usr/bin/ssh-add
 
 ### Run playbook
 
