@@ -1,5 +1,8 @@
 ---
-# file: roles/shorewall/meta/main.yml
+## file: roles/shorewall/meta/main.yml
+#
+#
+
 dependencies:
   - { role: ensure_dirs, 
         ensure_dirs_on_remote: "{{ shorewall_ensure_dirs_on_remote }}",
@@ -9,7 +12,7 @@ dependencies:
 galaxy_info:
   author: Christopher Steel
   description: A role for configuring shorewall 
-  company: MCIN
+  company: McGill Centre for Integrative Neuroscience
   license: MIT
   min_ansible_version: 2.0.0.2
   platforms:
