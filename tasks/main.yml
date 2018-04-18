@@ -43,7 +43,8 @@
 
 - name: "get the name of the current active interface"
   become: true
-  shell: route | grep '^default' | grep -o '[^ ]*$'
+  #  shell: route | grep '^default' | grep -o '[^ ]*$'
+  shell: ip route get 8.8.8.8 | awk 'NR==2 {print $1}' RS="dev"
   ignore_errors: true
   register: shorewall_route_default_interface
   when: ansible_os_family == "Debian"
@@ -188,13 +189,13 @@
   become: true
   template:
     backup=yes
-    src='{{ ansible_distribution }}/{{ ansible_distribution_major_version }}/{{ item.value.src }}.j2'
+    src='{{ ansible_distribution }}/{{ ansible_distribution_version }}/{{ item.value.src }}.j2'
     dest='{{ item.value.dest }}'
     owner='{{ item.value.owner | default(omit) }}'
     group='{{ item.value.group | default(omit) }}'
     mode='{{ item.value.mode | default(omit) }}'
   with_dict: "{{ shorewall_config_files }}"
-  when: ansible_os_family == "RedHat"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: "running our templates and generate our configuration files"
   become: true
@@ -206,7 +207,7 @@
     group='{{ item.value.group | default(omit) }}'
     mode='{{ item.value.mode | default(omit) }}'
   with_dict: "{{ shorewall_config_files }}"
-  when: ansible_os_family != "RedHat"
+  when: ansible_os_family == "RedHat"
 
 - name: "ensure masq file templatized when shorewall_configure_masq == true"
   template:
@@ -273,6 +274,7 @@
 - name: "Start the shorewall service if it is not running"
   become: true
   shell: shorewall start
+  #  shell: /etc/init.d/shorewall start
   register: shorewall_start_output
   when: shorewall_status.stdout.find('Shorewall is running') == -1
   tags: [ 'packages', 'shorewall' ]
@@ -284,6 +286,7 @@
 - name: "run shorewall status command"
   become: true
   shell: shorewall status
+  #  shell: /etc/init.d/shorewall status
   register: shorewall_status_command
   tags: [ 'packages', 'shorewall', 'status' ]
 
@@ -292,10 +295,11 @@
 
 # Fail if shorewall is not running
 
-- name: 1st test, fail if shorewall is not running
-  fail: msg="1st test, shorewall failed to start on {{ inventory_hostname }}!!!"
-  when: shorewall_status_command.stdout.find('Shorewall is running') == -1
-  tags: [ 'packages', 'shorewall', 'status' ]
+  #- name: 1st test, fail if shorewall is not running
+# become: true
+# fail: msg="1st test, shorewall failed to start on {{ inventory_hostname }}!!!"
+# when: shorewall_status_command.stdout.find('Shorewall is running') == -1
+# tags: [ 'packages', 'shorewall', 'status' ]
 
 # Configure shorewall to start on system boot as we are still able to connect.
 #
@@ -308,7 +312,7 @@
     regexp='^startup=0'
     line='startup=1'
 #    state='present'
-  when: ansible_distribution == "Ubuntu"
+  when: ansible_distribution == "Ubuntu" or ansible_distribution == "Debian"
   tags: [ 'packages', 'shorewall', 'shorewall_check' ]
 
 # Set shorewall to start on boot.
@@ -327,7 +331,7 @@
   become: true
   shell: systemctl enable shorewall
   register: shorewall_systemctl_check
-  when: ansible_distribution_version is defined and ansible_distribution_version == "16.04" or ansible_distribution_version == "15.04"
+  when: ansible_distribution_version is defined and ansible_distribution_version == "16.04" or ansible_distribution_version == "15.04" or ansible_distribution_version == "9.4"
   tags: [ 'packages', 'shorewall', 'shorewall_systemctl_check' ]
 
 - debug: var=shorewall_systemctl_check
