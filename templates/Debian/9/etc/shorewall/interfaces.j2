@@ -1,0 +1,29 @@
+################################################################################
+# {{ ansible_managed }}
+#
+# shorewall-5.0.11.0-1.el6.noarch.rpm
+# shorewall-core-5.0.11.0-1.el6.noarch.rpm
+# /etc/shorewall/interfaces
+# root:root 600
+# Used by service: Shorewall 
+#
+# Shorewall interfaces file
+#
+# 0.1 2016-06-13 - csteel - Initial file
+###############################################################################
+#
+# Shorewall -- /etc/shorewall/interfaces
+#
+# For information about entries in this file, type "man shorewall-interfaces"
+#
+# The manpage is also online at
+# http://www.shorewall.net/manpages/shorewall-interfaces.html
+#
+?FORMAT 2
+###############################################################################
+#ZONE		INTERFACE		OPTIONS
+{% for i in interfaces %}
+{{ i.zone }}    {{ i.int }}    {% if i.broadcast is defined %}{{ i.broadcast }}{% else %}{% endif %}    {% if i.options is defined %}{{ i.options }}{% else %}{% endif %}
+
+{% endfor %}
+
