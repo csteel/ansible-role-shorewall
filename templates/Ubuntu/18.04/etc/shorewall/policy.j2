@@ -1,0 +1,29 @@
+################################################################################
+# {{ ansible_managed }}
+#
+# shorewall-5.0.11.0-1.el6.noarch.rpm
+# shorewall-core-5.0.11.0-1.el6.noarch.rpm
+# /etc/shorewall/policy
+# root:root 600
+# Used by service: Shorewall 
+#
+# Shorewall policy file
+#
+# 0.1 2016-06-13 - csteel - Initial file
+###############################################################################
+#
+# Shorewall -- /etc/shorewall/policy
+#
+# For information about entries in this file, type "man shorewall-policy"
+#
+# The manpage is also online at
+# http://www.shorewall.net/manpages/shorewall-policy.html
+#
+###############################################################################
+#SOURCE		DEST		POLICY	LOGLEVEL	LIMIT	CONNLIMIT
+{% for i in policies %}
+{{ i.src }}	{{ i.dst }}	{{ i.policy }}  {{ i.log_level }}
+{% endfor %}
+
+# THE FOLLOWING POLICY MUST ALWAYS BE LAST
+all     all     REJECT
